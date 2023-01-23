@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
-from flask_cors import CORS
+#from flask_cors import CORS
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -17,21 +17,27 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
         "SQLALCHEMY_DATABASE_URI")
 
-    # Import models here for Alembic setup
-    from app.models.pin import Pin
-    from app.models.profile import Profile
-
 
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from .routes import pins_bp
-    app.register_blueprint(pins_bp)
+    # Import models here for Alembic setup
+    from app.models.pin import Pin
+    from app.models.profile import Profile
+
+    # db.init_app(app)
+    # migrate.init_app(app, db)
+
+    
 
     # Register Blueprints here
-    # from .routes import example_bp
-    # app.register_blueprint(example_bp)
+    # from .routes import pins_bp
+    # app.register_blueprint(pins_bp)
 
-    CORS(app)
+    # from .routes import profiles_bp
+    # app.register_blueprint(profiles_bp)
+    
+
+    #CORS(app)
     return app
 
