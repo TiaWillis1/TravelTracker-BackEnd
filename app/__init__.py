@@ -35,6 +35,7 @@ def create_app():
     # app.register_blueprint(pins_bp)
 
     # from .routes import profiles_bp
+    
     # app.register_blueprint(profiles_bp)
     
 
