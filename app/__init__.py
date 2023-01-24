@@ -16,6 +16,7 @@ def create_app():
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
         "SQLALCHEMY_DATABASE_URI")
+    app.config["SECRET_KEY"] = os.environ.get("CLIENT_SECRET")
 
 
     db.init_app(app)
@@ -34,9 +35,8 @@ def create_app():
     # from .routes import pins_bp
     # app.register_blueprint(pins_bp)
 
-    # from .routes import profiles_bp
-    
-    # app.register_blueprint(profiles_bp)
+    from .routes import app_bp
+    app.register_blueprint(app_bp)
     
 
     #CORS(app)

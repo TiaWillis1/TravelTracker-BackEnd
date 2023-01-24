@@ -2,13 +2,15 @@ import os
 import pathlib
 
 import requests
-from flask import Flask, session, abort, redirect, request
+from flask import Flask, Blueprint, session, abort, redirect, request
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from dotenv import load_dotenv
 
+
+app_bp = Blueprint("app", __name__)
 
 load_dotenv()
 
@@ -24,7 +26,7 @@ client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="http://localhost/callback"
+    redirect_uri="http://127.0.0.1:5000/callback"
 )
 
 
@@ -38,14 +40,14 @@ def login_is_required(function):
     return wrapper
 
 
-@app.route("/login")
+@app_bp.route("/login")
 def login():
     authorization_url, state = flow.authorization_url()
     session["state"] = state
     return redirect(authorization_url)
 
 
-@app.route("/callback")
+@app_bp.route("/callback")
 def callback():
     flow.fetch_token(authorization_response=request.url)
 
@@ -68,18 +70,18 @@ def callback():
     return redirect("/protected_area")
 
 
-@app.route("/logout")
+@app_bp.route("/logout")
 def logout():
     session.clear()
     return redirect("/")
 
 
-@app.route("/")
+@app_bp.route("/", methods=["GET"])
 def index():
     return "Hello World <a href='/login'><button>Login</button></a>"
 
 
-@app.route("/protected_area")
+@app_bp.route("/protected_area")
 @login_is_required
 def protected_area():
     return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"
