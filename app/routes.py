@@ -2,13 +2,15 @@ import os
 import pathlib
 
 import requests
-from flask import Flask, Blueprint, session, abort, redirect, request
+from flask import Flask, Blueprint, session, abort, redirect, request, make_response
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from dotenv import load_dotenv
-
+import psycopg2
+from app import db 
+from app.models.profile import Profile
 
 app_bp = Blueprint("app", __name__)
 profiles_bp = Blueprint("app", __name__, url_prefix="/profiles")
@@ -96,6 +98,23 @@ def protected_area():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80, debug=True)
+    
+
+
+
+# helper function
+def validate_model(cls, model_id):
+    try: 
+        model_id = int(model_id)
+    except:
+        abort(make_response({"message": f"{cls.__name__} {model_id} invalid"}, 400)) 
+
+    model = cls.query.get(model_id)
+    
+    if not model:
+        abort(make_response({"message": f"{cls.__name__} {model_id} not found"}, 404)) 
+
+    return model
 
 
 
@@ -104,9 +123,36 @@ if __name__ == "__main__":
 
 
 #CREATE PROFILE ROUTE 
+@profiles_bp.route("", methods=["POST"]) 
+def create_profile():
+    request_body = request.get_json()
 
-# @profiles_bp.route("", methods=["POST"]) 
-# def create_profile():
+    try:
+        new_profile = Profile.from_json(request_body)
+    except KeyError:
+        return make_response({"details": "Invalid data"}, 400)
 
-#     if session['google_id'] not in travel_tracker_development: 
+    db.session.add(new_profile)
+    db.session.commit()
+
+    return make_response(new_profile.to_dict_boards(), 201)
+
+
+def authenticate_subs():
+    conn = None
+    try:
+        #params = config()
+        conn = psycopg2.connect(database = "testdb", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        cur = conn.cursor()
+        cur.execute("SELECT sub, FROM profile")
+        rows = cur.fetchall()
+        print("The number of subs: ", cur.rowcount)
+        for row in rows:
+            print(row)
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 

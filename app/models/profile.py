@@ -13,3 +13,10 @@ class Profile(db.Model):
             sub = req_body["sub"], 
             name = req_body["name"],
         )
+
+    def to_dict_boards(self):
+        return { "profile":{
+                "id":self.id,
+                "sub": self.sub,
+                "name": self.name}
+                }
