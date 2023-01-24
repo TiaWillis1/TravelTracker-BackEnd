@@ -1,6 +1,7 @@
 from app import db
 
 
+
 class Pin(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'))
@@ -9,3 +10,5 @@ class Pin(db.Model):
     latitude = db.Column(db.Float, nullable=False)
     location_name = db.Column(db.String, nullable=False)
     date = db.Column(db.Date)
+
+
