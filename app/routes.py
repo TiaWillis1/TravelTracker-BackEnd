@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 
 app_bp = Blueprint("app", __name__)
+profiles_bp = Blueprint("app", __name__, url_prefix="/profiles")
 
 load_dotenv()
 
@@ -65,10 +66,15 @@ def callback():
         audience=GOOGLE_CLIENT_ID
     )
 
+
+
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
     return redirect("/protected_area")
 
+
+############ ROUTES FOR GOOGLE AUTH ###############
+###################################################
 
 @app_bp.route("/logout")
 def logout():
@@ -84,8 +90,23 @@ def index():
 @app_bp.route("/protected_area")
 @login_is_required
 def protected_area():
-    return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"
+    #return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"
+    return f"{session['google_id']}"
 
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80, debug=True)
+
+
+
+########### ROUTES TO CREATE PROFILE ###############
+####################################################
+
+
+#CREATE PROFILE ROUTE 
+
+# @profiles_bp.route("", methods=["POST"]) 
+# def create_profile():
+
+#     if session['google_id'] not in travel_tracker_development: 
+
