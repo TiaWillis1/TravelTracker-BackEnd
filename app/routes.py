@@ -13,7 +13,7 @@ from app import db
 from app.models.profile import Profile
 
 app_bp = Blueprint("app", __name__)
-profiles_bp = Blueprint("app", __name__, url_prefix="/profiles")
+#profiles_bp = Blueprint("app", __name__, url_prefix="/profiles")
 
 load_dotenv()
 
@@ -74,7 +74,7 @@ def callback():
     session["name"] = id_info.get("name")
     if session["google_id"]:
         authenticate_subs()
-    return redirect("/protected_area")
+    return redirect("/profiles/profile_id")
 
 
 ############ ROUTES FOR GOOGLE AUTH ###############
@@ -91,11 +91,23 @@ def index():
     return "Hello World <a href='/login'><button>Login</button></a>"
 
 
-@app_bp.route("/protected_area")
+@app_bp.route("/profiles/profile_id")
 @login_is_required
-def protected_area():
-    #return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"
-    return f"{session['google_id']}"
+def profile_id_redirect():
+    conn = None
+    sub_id = session["google_id"]
+    try:
+        conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        cur = conn.cursor()
+        cur.execute(f"SELECT id FROM profile WHERE sub = '{sub_id}'")
+        profile_id = cur.fetchone()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return f"{profile_id}"
 
 
 if __name__ == "__main__":
@@ -122,22 +134,6 @@ def validate_model(cls, model_id):
 
 ########### ROUTES TO CREATE PROFILE ###############
 ####################################################
-
-
-#CREATE PROFILE ROUTE 
-@profiles_bp.route("", methods=["POST"]) 
-def create_profile():
-    request_body = request.get_json()
-
-    try:
-        new_profile = Profile.from_json(request_body)
-    except KeyError:
-        return make_response({"details": "Invalid data"}, 400)
-
-    db.session.add(new_profile)
-    db.session.commit()
-
-    return make_response(new_profile.to_dict_boards(), 201)
 
 
 def authenticate_subs():
@@ -173,4 +169,3 @@ def authenticate_subs():
     finally:
         if conn is not None:
             conn.close()
-
