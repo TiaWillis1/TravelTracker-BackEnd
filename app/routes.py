@@ -70,8 +70,10 @@ def callback():
 
 
 
-    session["google_id"] = id_info.get("sub")
+    session["google_id"] = str(id_info.get("sub"))
     session["name"] = id_info.get("name")
+    if session["google_id"]:
+        authenticate_subs()
     return redirect("/protected_area")
 
 
@@ -139,19 +141,35 @@ def create_profile():
 
 
 def authenticate_subs():
+    # creating variable conn, start as None- if its not none it will close database
+    # if database is left open could cause issues
     conn = None
+    sub_id = session["google_id"]
     try:
-        #params = config()
-        conn = psycopg2.connect(database = "testdb", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        # connects to database 
+        conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        # object to execute query, how psycopg2 library works
         cur = conn.cursor()
-        cur.execute("SELECT sub, FROM profile")
-        rows = cur.fetchall()
-        print("The number of subs: ", cur.rowcount)
-        for row in rows:
-            print(row)
+        # executing SQL query
+        cur.execute(f"SELECT sub FROM profile WHERE sub = '{sub_id}'")
+        # fetching row of data from the query 
+        row = cur.fetchone()
+        if row == None:
+            # create new profile in database
+            # add user info (sub, name) from google auth
+            new_profile = Profile(
+                sub=sub_id,
+                name=session["name"],
+            )
+            
+            db.session.add(new_profile)
+            db.session.commit()
+        
+        # close the cursor
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+    # close the database so connection is not left open
     finally:
         if conn is not None:
             conn.close()

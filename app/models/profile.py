@@ -3,7 +3,7 @@ from app import db
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    sub = db.Column(db.Integer)
+    sub = db.Column(db.String)
     pins = db.relationship("Pin", back_populates="profile")
     name = db.Column(db.String) 
 

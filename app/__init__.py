@@ -6,7 +6,8 @@ import os
 #from flask_cors import CORS
 
 db = SQLAlchemy()
-migrate = Migrate()
+# make sure type is updated when doing flask migrate
+migrate = Migrate(compare_type=True)
 load_dotenv()
 
 
