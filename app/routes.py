@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import psycopg2
 from app import db 
 from app.models.profile import Profile
+from app.models.pin import Pin
 
 app_bp = Blueprint("app", __name__)
 #pins_bp = Blueprint("app", __name__, url_prefix="/pins")
@@ -199,4 +200,4 @@ def get_lat_long():
     else:
         return
 
-#print(get_lat_long()) 
+print(get_lat_long()) 
