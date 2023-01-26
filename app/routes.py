@@ -2,7 +2,7 @@ import os
 import pathlib
 
 import requests
-from flask import Flask, Blueprint, session, abort, redirect, request, make_response
+from flask import Flask, Blueprint, session, abort, jsonify, redirect, request, make_response
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
@@ -13,7 +13,7 @@ from app import db
 from app.models.profile import Profile
 
 app_bp = Blueprint("app", __name__)
-#profiles_bp = Blueprint("app", __name__, url_prefix="/profiles")
+#pins_bp = Blueprint("app", __name__, url_prefix="/pins")
 
 load_dotenv()
 
@@ -68,8 +68,6 @@ def callback():
         audience=GOOGLE_CLIENT_ID
     )
 
-
-
     session["google_id"] = str(id_info.get("sub"))
     session["name"] = id_info.get("name")
     if session["google_id"]:
@@ -96,6 +94,7 @@ def index():
 def profile_id_redirect():
     conn = None
     sub_id = session["google_id"]
+    name = session["name"]
     try:
         conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
         cur = conn.cursor()
@@ -107,11 +106,11 @@ def profile_id_redirect():
     finally:
         if conn is not None:
             conn.close()
-    return f"{profile_id}"
+    return f"Welcome {name} your profile number is {profile_id}"
 
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80, debug=True)
+# if __name__ == "__main__":
+#     app.run(host='0.0.0.0', port=80, debug=True)
     
 
 
@@ -132,7 +131,7 @@ def validate_model(cls, model_id):
 
 
 
-########### ROUTES TO CREATE PROFILE ###############
+########### ROUTES/FUNCTIONS FOR PROFILE ###############
 ####################################################
 
 
@@ -169,3 +168,35 @@ def authenticate_subs():
     finally:
         if conn is not None:
             conn.close()
+
+@app_bp.route("/profiles/<profile_id>", methods=["DELETE"])
+def delete_profile(profile_id):
+    profile = validate_model(Profile,profile_id)
+
+    db.session.delete(profile)
+    db.session.commit()
+    deleted_profile_dict = {"details":f"Profile {profile.id} successfully deleted"}
+
+    return make_response(jsonify(deleted_profile_dict), 200)
+
+
+
+def get_lat_long(): 
+    
+
+    address = '1 hack drive, menlo park, CA'
+
+    params = {'key': os.environ.get("G_KEY"),
+    'address' : address}
+
+    base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
+    response = requests.get(base_url, params=params)
+    data = response.json() 
+    if data['status'] == 'OK':
+        result = data['results'][0]
+        location = result['geometry']['location']
+        return location['lat'], location['lng']
+    else:
+        return
+
+#print(get_lat_long()) 

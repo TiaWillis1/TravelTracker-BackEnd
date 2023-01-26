@@ -27,14 +27,13 @@ def create_app():
     from app.models.pin import Pin
     from app.models.profile import Profile
 
-    # db.init_app(app)
-    # migrate.init_app(app, db)
-
-    
 
     # Register Blueprints here
     # from .routes import pins_bp
     # app.register_blueprint(pins_bp)
+
+    # from .routes import profiles_bp
+    # app.register_blueprint(profiles_bp)
 
     from .routes import app_bp
     app.register_blueprint(app_bp)
