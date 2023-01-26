@@ -121,7 +121,7 @@ def validate_model(cls, model_id):
     try: 
         model_id = int(model_id)
     except:
-        abort(make_response({"message": f"{cls.__name__} {model_id} invalid"}, 400)) 
+        abort(make_response({"message from validate model": f"{cls.__name__} {model_id} invalid"}, 400)) 
 
     model = cls.query.get(model_id)
     
@@ -200,4 +200,29 @@ def get_lat_long():
     else:
         return
 
-print(get_lat_long()) 
+#print(get_lat_long())
+
+
+@app_bp.route("/profiles/<profile_id>/pins", methods=["POST"])
+def create_pin(profile_id):
+    
+    profile = validate_model(Profile, profile_id) 
+    request_body = request.get_json()
+
+    try:
+        new_pin = Pin.from_json(request_body)
+    except KeyError:
+        return make_response({"details make response": "Invalid data"}, 400)
+
+    db.session.add(new_pin)
+    db.session.commit()
+    profile.pins.append(new_pin)
+
+    db.session.add(profile)
+    db.session.commit() 
+
+    return make_response(new_pin.to_dict_pins(), 201)
+
+
+    # maybe werent suposed to use id, 
+
