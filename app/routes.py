@@ -231,9 +231,10 @@ def create_pin(profile_id):
     finally:
         if conn is not None:
             conn.close()
-            return make_response(new_pin.to_dict_pins(), 201)
+        if new_pin.id == None:
+            return f"pin already exists, no duplicate pins allowed"   
         else:
-            return f"pin already exists, no duplicate pins allowed"
+            return make_response(new_pin.to_dict_pins(), 201)
 
 
 # route to delete a pin 
