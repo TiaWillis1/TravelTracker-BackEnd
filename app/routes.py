@@ -100,14 +100,24 @@ def profile_id_redirect():
         conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
         cur = conn.cursor()
         cur.execute(f"SELECT id FROM profile WHERE sub = '{sub_id}'")
-        profile_id = cur.fetchone()
+        profile_id = cur.fetchone()[0]
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-    return f"Welcome {name} your profile number is {profile_id}"
+    profile = validate_model(Profile, profile_id)
+    
+    all_pins = []
+    for pin in profile.pins:
+        all_pins.append({
+            "id": pin.id,
+            "latitude": pin.latitude,
+            "longitude": pin.longitude,
+            "location_name": pin.location_name
+        })
+    return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
 
 
 # if __name__ == "__main__":
@@ -226,7 +236,7 @@ def create_pin(profile_id):
     try:
         conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
         cur = conn.cursor()
-        cur.execute(f"SELECT location_name FROM pin WHERE profile_id = '{profile_id}' INTERSECT SELECT location_name FROM pin WHERE location_name = '{new_pin.location_name}'")
+        cur.execute(f"SELECT location_name FROM pin WHERE profile_id = '{profile_id}' AND longitude = {new_pin.longitude} AND latitude = {new_pin.latitude}")
         locations = cur.fetchone()
         if locations == None:
             db.session.add(new_pin)
@@ -258,7 +268,7 @@ def delete_pin(pin_id):
     return make_response(jsonify(deleted_pin_dict), 200)
 
 
-# route to get pins 
+#route to get pins 
 @app_bp.route("/profiles/<profile_id>/pins", methods= ["GET"])
 def get_all_pins(profile_id):
 
