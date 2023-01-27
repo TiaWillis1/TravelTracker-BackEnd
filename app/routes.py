@@ -182,10 +182,8 @@ def delete_profile(profile_id):
 
 
 
-def get_lat_long(): 
+def get_lat_long(address): 
 
-
-    address = '1 hack drive, menlo park, CA'
 
     params = {'key': os.environ.get("G_KEY"),
     'address' : address}
@@ -196,20 +194,29 @@ def get_lat_long():
     if data['status'] == 'OK':
         result = data['results'][0]
         location = result['geometry']['location']
-        return location['lat'], location['lng']
+        geo_coord_list = [location['lat'], location['lng']]
+        return geo_coord_list
     else:
-        return
+        return f"Address invalid, please check your request and try again"
 
 
 
 @app_bp.route("/profiles/<profile_id>/pins", methods=["POST"])
 def create_pin(profile_id):
-
-    profile = validate_model(Profile, profile_id) 
     request_body = request.get_json()
+    get_geocode_coord = get_lat_long(request_body["location_name"])
+    print(get_geocode_coord[0])
+    print(get_geocode_coord[1])
+
+    profile = validate_model(Profile, profile_id)
 
     try:
-        new_pin = Pin.from_json(request_body)
+        new_pin = Pin(
+            longitude = get_geocode_coord[1],
+            latitude = get_geocode_coord[0],
+            location_name = request_body["location_name"],
+            date = request_body["date"]
+        )
     except KeyError:
         return make_response({"details make response": "Invalid data"}, 400)
 
