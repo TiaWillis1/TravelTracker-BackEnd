@@ -181,6 +181,8 @@ def delete_profile(profile_id):
     return make_response(jsonify(deleted_profile_dict), 200)
 
 
+##################### PIN ROUTES ########################
+#########################################################
 
 def get_lat_long(address): 
 
@@ -254,6 +256,23 @@ def delete_pin(pin_id):
     deleted_pin_dict = {"details":f"Pin for {pin.location_name} successfully deleted"}
 
     return make_response(jsonify(deleted_pin_dict), 200)
+
+
+# route to get pins 
+@app_bp.route("/profiles/<profile_id>/pins", methods= ["GET"])
+def get_all_pins(profile_id):
+
+    profile = validate_model(Profile, profile_id)
+    pins_response = []
+    for pin in profile.pins:
+        pins_response.append({
+            "id": pin.id,
+            "latitude": pin.latitude,
+            "longitude": pin.longitude,
+            "location_name": pin.location_name
+        })
+
+    return jsonify(pins_response)
 
 
         
