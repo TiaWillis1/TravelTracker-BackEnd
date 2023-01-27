@@ -12,6 +12,7 @@ import psycopg2
 from app import db 
 from app.models.profile import Profile
 from app.models.pin import Pin
+from psycopg2.extensions import parse_dsn
 
 app_bp = Blueprint("app", __name__)
 #pins_bp = Blueprint("app", __name__, url_prefix="/pins")
@@ -30,7 +31,7 @@ client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="https://dry-dawn-42061.herokuapp.com/callback"
+    redirect_uri=os.environ.get("G_CLIENT_CALLBACK_URI_DEV")
 )
 
 
@@ -96,9 +97,8 @@ def profile_id_redirect():
     conn = None
     sub_id = session["google_id"]
     name = session["name"]
-    profile_id = 0
     try:
-        conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("PORT"))
         cur = conn.cursor()
         cur.execute(f"SELECT id FROM profile WHERE sub = '{sub_id}'")
         profile_id = cur.fetchone()[0]
@@ -154,7 +154,7 @@ def authenticate_subs():
     sub_id = session["google_id"]
     try:
         # connects to database 
-        conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("PORT"))
         # object to execute query, how psycopg2 library works
         cur = conn.cursor()
         # executing SQL query
@@ -235,7 +235,7 @@ def create_pin(profile_id):
 
     conn = None
     try:
-        conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("PORT"))
         cur = conn.cursor()
         cur.execute(f"SELECT location_name FROM pin WHERE profile_id = '{profile_id}' AND longitude = {new_pin.longitude} AND latitude = {new_pin.latitude}")
         locations = cur.fetchone()
