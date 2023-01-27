@@ -98,7 +98,7 @@ def profile_id_redirect():
     sub_id = session["google_id"]
     name = session["name"]
     try:
-        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("PORT"))
+        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("DB_PORT"))
         cur = conn.cursor()
         cur.execute(f"SELECT id FROM profile WHERE sub = '{sub_id}'")
         profile_id = cur.fetchone()[0]
@@ -154,7 +154,7 @@ def authenticate_subs():
     sub_id = session["google_id"]
     try:
         # connects to database 
-        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("PORT"))
+        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("DB_PORT"))
         # object to execute query, how psycopg2 library works
         cur = conn.cursor()
         # executing SQL query
@@ -235,7 +235,7 @@ def create_pin(profile_id):
 
     conn = None
     try:
-        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("PORT"))
+        conn = psycopg2.connect(database = os.environ.get("DATABASE_NAME"), user = os.environ.get("USER"), password = os.environ.get("PASSWORD"), host = os.environ.get("HOST"), port = os.environ.get("DB_PORT"))
         cur = conn.cursor()
         cur.execute(f"SELECT location_name FROM pin WHERE profile_id = '{profile_id}' AND longitude = {new_pin.longitude} AND latitude = {new_pin.latitude}")
         locations = cur.fetchone()
