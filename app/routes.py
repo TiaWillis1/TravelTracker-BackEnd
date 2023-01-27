@@ -202,45 +202,9 @@ def get_lat_long():
 
 
 
-# @app_bp.route("/profiles/<profile_id>/pins", methods=["POST"])
-# def create_pin(profile_id):
-
-#     profile = validate_model(Profile, profile_id) 
-#     request_body = request.get_json()
-
-#     try:
-#         new_pin = Pin.from_json(request_body)
-#     except KeyError:
-#         return make_response({"details make response": "Invalid data"}, 400)
-
-#     conn = None
-#     try:
-#         conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
-#         cur = conn.cursor()
-#         cur.execute(f"SELECT location_name FROM pin WHERE profile_id = '{new_pin.profile_id}' INTERSECT SELECT location_name FROM pin WHERE location_name = '{new_pin.location_name}'")
-#         locations = cur.fetchone()
-#         if locations == None:
-#             db.session.add(new_pin)
-#             db.session.commit()
-#             profile.pins.append(new_pin)
-
-#             db.session.add(profile)
-#             db.session.commit()
-#         cur.close()
-#     except (Exception, psycopg2.DatabaseError) as error:
-#         print(error)
-#     finally:
-#         if conn is not None:
-#             conn.close()
-#             return make_response(new_pin.to_dict_pins(), 201)
-#         else:
-#             return f"pin already exists, no duplicate pins allowed"
-
-
-# create a post route for pins
 @app_bp.route("/profiles/<profile_id>/pins", methods=["POST"])
 def create_pin(profile_id):
-    
+
     profile = validate_model(Profile, profile_id) 
     request_body = request.get_json()
 
@@ -249,14 +213,27 @@ def create_pin(profile_id):
     except KeyError:
         return make_response({"details make response": "Invalid data"}, 400)
 
-    db.session.add(new_pin)
-    db.session.commit()
-    profile.pins.append(new_pin)
-
-    db.session.add(profile)
-    db.session.commit() 
-
-    return make_response(new_pin.to_dict_pins(), 201)
+    conn = None
+    try:
+        conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+        cur = conn.cursor()
+        cur.execute(f"SELECT location_name FROM pin WHERE profile_id = '{profile_id}' INTERSECT SELECT location_name FROM pin WHERE location_name = '{new_pin.location_name}'")
+        locations = cur.fetchone()
+        if locations == None:
+            db.session.add(new_pin)
+            db.session.commit()
+            profile.pins.append(new_pin)
+            db.session.add(profile)
+            db.session.commit()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+            return make_response(new_pin.to_dict_pins(), 201)
+        else:
+            return f"pin already exists, no duplicate pins allowed"
 
 
 # route to delete a pin 
