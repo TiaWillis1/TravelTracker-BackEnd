@@ -207,7 +207,8 @@ def get_lat_long(address):
     if data['status'] == 'OK':
         result = data['results'][0]
         location = result['geometry']['location']
-        geo_coord_list = [location['lat'], location['lng']]
+        geo_location_name = result['formatted_address']
+        geo_coord_list = {'lat': location['lat'], 'lng': location['lng'], 'address': geo_location_name}
         return geo_coord_list
     else:
         return f"Address invalid, please check your request and try again"
@@ -218,16 +219,14 @@ def get_lat_long(address):
 def create_pin(profile_id):
     request_body = request.get_json()
     get_geocode_coord = get_lat_long(request_body["location_name"])
-    print(get_geocode_coord[0])
-    print(get_geocode_coord[1])
 
     profile = validate_model(Profile, profile_id)
 
     try:
         new_pin = Pin(
-            longitude = get_geocode_coord[1],
-            latitude = get_geocode_coord[0],
-            location_name = request_body["location_name"],
+            longitude = get_geocode_coord['lng'],
+            latitude = get_geocode_coord['lat'],
+            location_name = get_geocode_coord['address'],
             date = request_body["date"]
         )
     except KeyError:
