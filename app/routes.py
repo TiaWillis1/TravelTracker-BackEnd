@@ -96,6 +96,7 @@ def profile_id_redirect():
     conn = None
     sub_id = session["google_id"]
     name = session["name"]
+    profile_id = 0
     try:
         conn = psycopg2.connect(database = "travel_tracker_development", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
         cur = conn.cursor()
