@@ -51,9 +51,9 @@ def login():
     # authorization_url, state = flow.authorization_url()
     # session["state"] = state
     # return redirect(authorization_url)
-    request_body = request.get_json()
-    session["google_id"] = str(request_body["sub"])
-    session["name"] = request_body["name"]
+    request_args = request.args
+    session["google_id"] = str(request_args.get("sub"))
+    session["name"] = request_args.get("name")
     if session["google_id"]:
         authenticate_subs()
     return redirect("/profiles/profile_id")
