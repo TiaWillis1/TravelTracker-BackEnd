@@ -14,6 +14,7 @@ from app.models.profile import Profile
 from app.models.pin import Pin
 from psycopg2.extensions import parse_dsn
 
+#making a change
 app_bp = Blueprint("app", __name__)
 CORS(app_bp)
 #pins_bp = Blueprint("app", __name__, url_prefix="/pins")
