@@ -40,6 +40,6 @@ def create_app():
     
 
     app.config['CORS_HEADERS'] = 'Content-Type'
-    CORS(app)
+    CORS(app, supports_credentials = True)
     return app
 
