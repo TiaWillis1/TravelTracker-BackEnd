@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
-#from flask_cors import CORS
+from flask_cors import CORS
 
 db = SQLAlchemy()
 # make sure type is updated when doing flask migrate
@@ -39,6 +39,6 @@ def create_app():
     app.register_blueprint(app_bp)
     
 
-    #CORS(app)
+    CORS(app)
     return app
 
