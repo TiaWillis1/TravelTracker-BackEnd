@@ -1,6 +1,6 @@
 import os
 import pathlib
-
+from flask_cors import CORS, cross_origin
 import requests
 from flask import Flask, Blueprint, session, abort, jsonify, redirect, request, make_response
 from google.oauth2 import id_token
@@ -44,7 +44,7 @@ def login_is_required(function):
 
     return wrapper
 
-
+@cross_origin()
 @app_bp.route("/login")
 def login():
     authorization_url, state = flow.authorization_url()
