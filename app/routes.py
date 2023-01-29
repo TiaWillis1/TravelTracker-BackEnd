@@ -48,8 +48,8 @@ def login_is_required(function):
 @cross_origin()
 @app_bp.route("/login")
 def login():
-    # authorization_url, state = flow.authorization_url()
-    # session["state"] = state
+    authorization_url, state = flow.authorization_url()
+    session["state"] = state
     # return redirect(authorization_url)
     request_args = request.args
     session["google_id"] = str(request_args.get("sub"))
