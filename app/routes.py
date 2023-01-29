@@ -45,18 +45,11 @@ def login_is_required(function):
 
     return wrapper
 
-@cross_origin()
 @app_bp.route("/login")
 def login():
     authorization_url, state = flow.authorization_url()
     session["state"] = state
-    # return redirect(authorization_url)
-    request_args = request.args
-    session["google_id"] = str(request_args.get("sub"))
-    session["name"] = request_args.get("name")
-    if session["google_id"]:
-        authenticate_subs()
-    return redirect("/profiles/profile_id")
+    return redirect(authorization_url)
 
 
 @app_bp.route("/callback")
@@ -125,8 +118,7 @@ def profile_id_redirect():
             "longitude": pin.longitude,
             "location_name": pin.location_name
         })
-    return make_response(jsonify(profile), 200)
-    # return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
+    return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
 
 
 # if __name__ == "__main__":
