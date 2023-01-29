@@ -15,6 +15,7 @@ from app.models.pin import Pin
 from psycopg2.extensions import parse_dsn
 
 app_bp = Blueprint("app", __name__)
+CORS(app_bp)
 #pins_bp = Blueprint("app", __name__, url_prefix="/pins")
 
 load_dotenv()
