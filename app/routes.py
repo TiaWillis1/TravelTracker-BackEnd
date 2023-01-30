@@ -33,6 +33,7 @@ flow = Flow.from_client_secrets_file(
     redirect_uri=os.environ.get("G_CLIENT_CALLBACK_URI_DEV")
 )
 
+
 def login_is_required(function):
     def wrapper(*args, **kwargs):
         if "google_id" not in session:
