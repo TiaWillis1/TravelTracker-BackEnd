@@ -16,14 +16,14 @@ from psycopg2.extensions import parse_dsn
 
 #making a change
 app_bp = Blueprint("app", __name__)
-CORS(app_bp)
+# CORS(app_bp)
 #pins_bp = Blueprint("app", __name__, url_prefix="/pins")
 
 load_dotenv()
 
 
-app = Flask("Google Login App")
-app.secret_key = os.environ.get("CLIENT_SECRET") # make sure this matches with that's in client_secret.json
+# app = Flask("Google Login App")
+# app.secret_key = os.environ.get("CLIENT_SECRET") # make sure this matches with that's in client_secret.json
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1" # to allow Http traffic for local dev
 
@@ -48,9 +48,14 @@ def login_is_required(function):
 
 @app_bp.route("/login")
 def login():
-    authorization_url, state = flow.authorization_url()
-    session["state"] = state
-    return redirect(authorization_url)
+    # authorization_url, state = flow.authorization_url()
+    # session["state"] = state
+    # return redirect(authorization_url)
+    session["google_id"] = str(request.args.get("sub"))
+    session["name"] = request.args.get("name")
+    if session["google_id"]:
+        authenticate_subs()
+    return profile_id_redirect()
 
 
 @app_bp.route("/callback")
@@ -119,7 +124,9 @@ def profile_id_redirect():
             "longitude": pin.longitude,
             "location_name": pin.location_name
         })
-    return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
+    
+    return make_response(jsonify(profile.to_dict_boards()), 200)
+    # return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
 
 
 # if __name__ == "__main__":
