@@ -14,7 +14,7 @@ class Profile(db.Model):
             name = req_body["name"],
         )
 
-    def to_dict_boards(self):
+    def to_dict_profiles(self):
         return { "profile":{
                 "id":self.id,
                 "sub": self.sub,
