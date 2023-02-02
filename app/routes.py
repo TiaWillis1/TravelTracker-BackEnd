@@ -179,6 +179,10 @@ def authenticate_subs():
 def delete_profile(profile_id):
     profile = validate_model(Profile,profile_id)
 
+    for pin in profile.pins: 
+        db.session.delete(pin)
+        db.session.commit() 
+
     db.session.delete(profile)
     db.session.commit()
     deleted_profile_dict = {"details":f"Profile {profile.id} successfully deleted"}
