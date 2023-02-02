@@ -16,6 +16,8 @@ from psycopg2.extensions import parse_dsn
 
 #making a change
 app_bp = Blueprint("app", __name__)
+# CORS(app_bp)
+#pins_bp = Blueprint("app", __name__, url_prefix="/pins")
 
 load_dotenv()
 
@@ -24,13 +26,14 @@ load_dotenv()
 # app.secret_key = os.environ.get("CLIENT_SECRET") # make sure this matches with that's in client_secret.json
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1" # to allow Http traffic for local dev
+
 GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri=os.environ.get("G_CLIENT_CALLBACK_URI_DEV")
+    redirect_uri=os.environ.get("G_CLIENT_CALLBACK_URI")
 )
 
 
@@ -45,6 +48,9 @@ def login_is_required(function):
 
 @app_bp.route("/login")
 def login():
+    # authorization_url, state = flow.authorization_url()
+    # session["state"] = state
+    # return redirect(authorization_url)
     session["google_id"] = str(request.args.get("sub"))
     session["name"] = request.args.get("name")
     if session["google_id"]:
@@ -119,7 +125,14 @@ def profile_id_redirect():
             "location_name": pin.location_name
         })
     
-    return make_response(jsonify(profile.to_dict_profiles()), 200)
+    return make_response(jsonify(profile.to_dict_boards()), 200)
+    # return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
+
+
+# if __name__ == "__main__":
+#     app.run(host='0.0.0.0', port=80, debug=True)
+    
+
 
 
 # helper function
@@ -166,6 +179,7 @@ def authenticate_subs():
             
             db.session.add(new_profile)
             db.session.commit()
+        
         # close the cursor
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -281,4 +295,7 @@ def get_all_pins(profile_id):
         })
 
     return jsonify(pins_response)
+
+
+        
 
