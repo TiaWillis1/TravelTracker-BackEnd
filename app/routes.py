@@ -124,6 +124,7 @@ def profile_id_redirect():
             "longitude": pin.longitude,
             "location_name": pin.location_name
         })
+    profile.pins = all_pins
     
     return make_response(jsonify(profile.to_dict_boards()), 200)
     # return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
