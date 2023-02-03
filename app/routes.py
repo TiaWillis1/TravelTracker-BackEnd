@@ -115,18 +115,14 @@ def profile_id_redirect():
         if conn is not None:
             conn.close()
     profile = validate_model(Profile, profile_id)
-    
     all_pins = []
     for pin in profile.pins:
-        all_pins.append({
-            "id": pin.id,
-            "latitude": pin.latitude,
-            "longitude": pin.longitude,
-            "location_name": pin.location_name
-        })
-    profile.pins = all_pins
-    
-    return make_response(jsonify(profile.to_dict_boards()), 200)
+        all_pins.append(pin.to_dict_pins())
+    print(f'Profile pins is: {all_pins}')
+    profile_dict = profile.to_dict_profiles()
+    profile_dict['pins'] = all_pins
+
+    return make_response(jsonify(profile_dict), 200)
     # return f"<p>Welcome {name} your profile number is {profile_id}.</p> </p>{all_pins}</p>"
 
 
