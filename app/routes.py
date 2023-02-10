@@ -260,7 +260,7 @@ def create_pin(profile_id):
         if conn is not None:
             conn.close()
         if new_pin.id == None:
-            return f"pin already exists, no duplicate pins allowed"   
+            return f"pin already exists, no duplicate pins allowed", 400
         else:
             return make_response(new_pin.to_dict_pins(), 201)
 
